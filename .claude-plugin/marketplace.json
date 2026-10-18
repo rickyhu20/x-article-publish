@@ -1,0 +1,12 @@
+{
+  "name": "x-article-publish",
+  "description": "x-article-publish 插件：把文章自动填进 X 长文编辑器",
+  "owner": { "name": "Ricky Hu" },
+  "plugins": [
+    {
+      "name": "x-article-publish",
+      "source": "./",
+      "description": "把本地文章（Markdown / Word / HTML，含配图和封面）自动填进 X 长文编辑器，填完停下由你手动发布"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "x-article-publish",
+  "description": "把本地文章（Markdown / Word / HTML，含配图和封面）自动填进 X 长文编辑器，填完停下由你手动发布",
+  "version": "0.1.0",
+  "author": { "name": "Ricky Hu" },
+  "license": "MIT",
+  "keywords": ["x", "twitter", "articles", "playwright", "publishing"]
+}

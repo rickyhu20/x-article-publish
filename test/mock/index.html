@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mock X Articles editor</title>
+<link rel="stylesheet" href="/vendor/Draft.css">
+<style>
+  body { font-family: -apple-system, sans-serif; margin: 0; background: #fff; color: #0f1419; }
+  header { display: flex; justify-content: space-between; padding: 12px 24px; border-bottom: 1px solid #eee; }
+  main { max-width: 680px; margin: 24px auto; }
+  .cover { height: 160px; border: 1px dashed #aaa; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; overflow: hidden; }
+  .cover img { width: 100%; }
+  textarea { width: 100%; font-size: 32px; border: 0; outline: none; resize: none; }
+  .toolbar { display: flex; gap: 8px; position: relative; margin: 8px 0; }
+  [role=menu] { z-index: 10; position: absolute; top: 32px; left: 0; background: #fff; border: 1px solid #ccc; display: flex; flex-direction: column; }
+  [role=dialog] { z-index: 20; position: fixed; inset: 30% 30%; background: #fff; border: 1px solid #333; padding: 24px; }
+  [data-testid=composer] { min-height: 300px; border-top: 1px solid #eee; padding-top: 12px; }
+  figure img { max-width: 100%; }
+  .uploading { color: #1d9bf0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="/vendor/react.js"></script>
+<script src="/vendor/react-dom.js"></script>
+<script src="/vendor/immutable.js"></script>
+<script src="/vendor/Draft.js"></script>
+<script>
+// 模拟X长文编辑器的关键结构：草稿列表 → create → 标题 + Draft.js正文 + Insert→Media→上传弹窗 + 封面 + Publish
+const h = React.createElement;
+const { Editor, EditorState, AtomicBlockUtils, convertToRaw } = Draft;
+window.__published = false;
+
+function Media(props) {
+  const entity = props.contentState.getEntity(props.block.getEntityAt(0));
+  return h('figure', null, h('img', { src: entity.getData().src }));
+}
+
+function App() {
+  const [view, setView] = React.useState('list');
+  const [es, setEs] = React.useState(() => EditorState.createEmpty());
+  const [menu, setMenu] = React.useState(false);
+  const [dialog, setDialog] = React.useState(null); // 'media' | 'cover-apply'
+  const [uploading, setUploading] = React.useState(false);
+  const [cover, setCover] = React.useState(null);
+  const [title, setTitle] = React.useState('');
+  const esRef = React.useRef(es); esRef.current = es;
+  const fileRef = React.useRef(); const coverRef = React.useRef();
+  window.__state = () => ({ title, cover: !!cover, blocks: convertToRaw(esRef.current.getCurrentContent()).blocks.map(b => ({ type: b.type, text: b.text, styles: b.inlineStyleRanges.map(s => s.style), entities: b.entityRanges.length })) });
+
+  const fakeUpload = (file, done) => {
+    setUploading(true);
+    setTimeout(() => { setUploading(false); done(URL.createObjectURL(file)); }, 1500);
+  };
+  const onImage = (e) => {
+    const file = e.target.files[0]; e.target.value = '';
+    setDialog(null);
+    fakeUpload(file, (src) => {
+      const s = esRef.current;
+      const content = s.getCurrentContent().createEntity('IMAGE', 'IMMUTABLE', { src });
+      const next = AtomicBlockUtils.insertAtomicBlock(EditorState.set(s, { currentContent: content }), content.getLastCreatedEntityKey(), ' ');
+      setEs(next);
+    });
+  };
+  const onCover = (e) => {
+    const file = e.target.files[0]; e.target.value = '';
+    fakeUpload(file, (src) => { setCover(src); setDialog('cover-apply'); });
+  };
+
+  const top = h('header', null, h('strong', null, 'Articles'),
+    h('button', { onClick: () => { window.__published = true; } }, 'Publish'));
+  if (view === 'list') {
+    return h('div', null, top, h('main', null, h('p', null, 'Your drafts'),
+      h('button', { onClick: () => setTimeout(() => setView('edit'), 600) }, 'create')));
+  }
+  return h('div', null, top, h('main', null,
+    h('div', { className: 'cover' }, cover ? h('img', { src: cover }) :
+      h('button', { onClick: () => coverRef.current.click() }, 'Add photos or video')),
+    h('input', { type: 'file', accept: 'image/*', ref: coverRef, style: { display: 'none' }, onChange: onCover }),
+    h('textarea', { placeholder: 'Add a title', rows: 1, value: title, onChange: (e) => setTitle(e.target.value) }),
+    h('div', { className: 'toolbar' },
+      h('button', { onMouseDown: (e) => e.preventDefault(), onClick: () => setMenu(!menu) }, 'Insert'),
+      menu && h('div', { role: 'menu' },
+        h('div', { role: 'menuitem', tabIndex: 0, onClick: () => { setMenu(false); setDialog('media'); } }, 'Media'),
+        h('div', { role: 'menuitem', tabIndex: 0 }, 'GIF'),
+        h('div', { role: 'menuitem', tabIndex: 0 }, 'Divider'))),
+    uploading && h('div', { className: 'uploading' }, 'Uploading media'),
+    h('div', { 'data-testid': 'composer' },
+      h(Editor, { editorState: es, onChange: setEs, placeholder: 'Start writing',
+        blockRendererFn: (b) => b.getType() === 'atomic' ? { component: Media, editable: false } : null })),
+    dialog === 'media' && h('div', { role: 'dialog' }, h('p', null, 'Media'),
+      h('button', { onClick: () => fileRef.current.click() }, 'Add photos or video'),
+      h('input', { type: 'file', accept: 'image/*', ref: fileRef, style: { display: 'none' }, onChange: onImage })),
+    dialog === 'cover-apply' && h('div', { role: 'dialog' }, h('p', null, 'Edit media'),
+      h('button', { onClick: () => setDialog(null) }, 'Apply')),
+  ));
+}
+ReactDOM.render(h(App), document.getElementById('root'));
+</script>
+</body>
+</html>

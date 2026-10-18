@@ -1,0 +1,30 @@
+{
+  "name": "x-article-fill",
+  "version": "0.1.0",
+  "description": "把文章自动填进X长文编辑器，填完停下由你手动发布",
+  "scripts": {
+    "test": "node test/run-mock.js",
+    "make-sample": "node test/make-images.js"
+  },
+  "author": "Ricky Hu",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "mammoth": "^1.13.0",
+    "marked": "^14.1.4",
+    "playwright": "^1.64.1",
+    "turndown": "^7.2.4"
+  },
+  "devDependencies": {
+    "draft-js": "^0.11.7",
+    "immutable": "^3.7.6",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0"
+  },
+  "bin": {
+    "x-article-fill": "bin/x-article-fill.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

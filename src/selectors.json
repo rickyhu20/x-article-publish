@@ -1,0 +1,63 @@
+{
+  "_说明": "X改版时只需改这个文件。每一项是候选列表，按顺序尝试，第一个能找到的生效。写法：{\"role\":\"button\",\"name\":\"文字或/正则/\"}、{\"css\":\"CSS选择器\"}、{\"placeholder\":\"占位文字\"}、{\"text\":\"文字或/正则/\"}。中英文界面都已列出。",
+
+  "composeUrl": "https://x.com/compose/articles",
+  "loginUrlPattern": "/(login|i/flow|logout)",
+
+  "createButton": [
+    { "role": "button", "name": "/^(create|新建|创建|撰写|Write)$/i" },
+    { "css": "[data-testid='empty_state_button_text']" },
+    { "role": "link", "name": "/^(create|新建|创建|Write)$/i" }
+  ],
+
+  "titleInput": [
+    { "placeholder": "/^(Add a title|添加标题)/i" },
+    { "css": "textarea[name='Article Title'], textarea[placeholder]" }
+  ],
+
+  "bodyEditor": [
+    { "css": "[data-testid='composer'] .public-DraftEditor-content" },
+    { "css": ".public-DraftEditor-content" },
+    { "css": "[data-testid='composer'][contenteditable='true']" },
+    { "css": "div[contenteditable='true'][role='textbox']" }
+  ],
+
+  "coverButton": [
+    { "role": "button", "name": "/^(Add photos or video|Add photo or video|添加照片或视频)$/i" },
+    { "css": "[data-testid='fileInput']" }
+  ],
+  "coverConfirm": [
+    { "role": "button", "name": "/^(Apply|Save|应用|保存)$/i" }
+  ],
+
+  "imageMenuSteps": [
+    [
+      { "role": "button", "name": "/^(Insert|插入|添加媒体|添加媒体内容|Add media|Add media content)$/i" }
+    ],
+    [
+      { "role": "menuitem", "name": "/^(Media|媒体|Photo|照片)$/i" },
+      { "role": "button", "name": "/^(Media|媒体)$/i" }
+    ]
+  ],
+  "imageFileButton": [
+    { "role": "button", "name": "/^(Add photos or video|Add photo or video|添加照片或视频)$/i", "within": "[role='dialog']" }
+  ],
+  "imageFileInput": "[role='dialog'] input[type='file'], input[type='file'][accept*='image']",
+  "imageConfirm": [
+    { "role": "button", "name": "/^(Apply|Insert|Done|应用|插入|完成)$/i" }
+  ],
+
+  "editorImage": "img",
+  "uploadingText": "/^\\s*(Uploading media|Processing media|Uploading|Processing|Cancel upload|正在上传媒体|正在处理媒体|正在上传|正在处理|取消上传)\\s*[.…。]*\\s*$/i",
+
+  "forbiddenClickNames": "/^(Publish|发布|Post|发帖|Schedule|定时发布|Tweet)$/i",
+
+  "timing": {
+    "minDelayMs": 400,
+    "maxDelayMs": 1200,
+    "typeDelayMs": 60,
+    "findTimeoutMs": 15000,
+    "uploadTimeoutMs": 180000,
+    "optionalStepTimeoutMs": 3000
+  }
+}
