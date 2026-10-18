@@ -11,7 +11,7 @@
 在 Claude Code 里运行：
 
 ```
-/plugin marketplace add guanqinghu520-gif/x-article-publish
+/plugin marketplace add rickyhu20/x-article-publish
 /plugin install x-article-publish@x-article-publish
 ```
 
@@ -20,7 +20,7 @@
 ## 方式二：作为命令行工具安装
 
 ```bash
-git clone https://github.com/guanqinghu520-gif/x-article-publish.git
+git clone https://github.com/rickyhu20/x-article-publish.git
 cd x-article-publish
 npm install
 npm link        # 之后在任何目录都能直接用 x-article-fill 命令
