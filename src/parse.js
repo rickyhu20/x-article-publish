@@ -16,6 +16,16 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
+// marked 的 text / escape 词元里的文字已经转义过，先还原再转义，避免出现 &amp;quot;
+function unescapeHtml(s) {
+  return String(s)
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
 // 占位行：先随正文一起粘贴，之后逐个替换成真正上传的图片
 export function imageMarker(n) {
   return `XAFIMG${String(n).padStart(3, '0')}XAF`;
@@ -94,10 +104,10 @@ function renderInline(tokens, ctx) {
     switch (t.type) {
       case 'text':
         // 中文写作里单个换行通常就是想换行，保留下来（否则粘贴后几行会并成一行）
-        out += t.tokens ? renderInline(t.tokens, ctx) : escapeHtml(t.text).replace(/\n/g, '<br>');
+        out += t.tokens ? renderInline(t.tokens, ctx) : escapeHtml(unescapeHtml(t.text)).replace(/\n/g, '<br>');
         break;
       case 'escape':
-        out += escapeHtml(t.text);
+        out += escapeHtml(unescapeHtml(t.text));
         break;
       case 'strong':
         out += `<strong>${renderInline(t.tokens, ctx)}</strong>`;

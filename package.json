@@ -1,6 +1,6 @@
 {
   "name": "x-article-fill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "把文章自动填进X长文编辑器，填完停下由你手动发布",
   "scripts": {
     "test": "node test/run-mock.js",

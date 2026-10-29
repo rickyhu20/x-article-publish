@@ -315,12 +315,48 @@ class Filler {
     }
   }
 
+  // 占位行前面最近的一段文字（用来核对图片最后落在了哪里）
+  async textBeforeMarker(marker) {
+    const ed = await this.editor();
+    return ed.evaluate((root, marker) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let prev = '';
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (node.data.includes(marker)) return prev;
+        if (node.data.trim()) prev = node.data.trim();
+      }
+      return null;
+    }, marker);
+  }
+
+  // 每张图片前面最近的一段文字
+  async textsBeforeImages() {
+    const ed = await this.editor();
+    return ed.evaluate((root, imgSel) => [...root.querySelectorAll(imgSel)].map((img) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let prev = '';
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (img.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING) break;
+        if (node.data.trim()) prev = node.data.trim();
+      }
+      return prev;
+    }), this.cfg.editorImage);
+  }
+
   async insertImage(img) {
     const { cfg } = this;
     const before = (await this.editorState()).images;
     const dialogs = await this.dialogCount();
+    const anchor = await this.textBeforeMarker(img.marker);
     await this.clearMarker(img.marker);
     await this.pause();
+    // X 保存上一张图时可能把占位文字恢复、光标跑掉；插图前再确认一次，否则图会插错位置
+    if ((await this.editorState()).text.includes(img.marker)) {
+      log.warn(`第${img.n}张图片的占位行被编辑器恢复了，重新定位`);
+      await sleep(3000);
+      await this.clearMarker(img.marker);
+      await this.pause();
+    }
 
     const clicks = cfg.imageMenuSteps.map((candidates, i) => ({ candidates, label: `插入图片菜单第${i + 1}步` }));
     clicks.push({ candidates: cfg.imageFileButton, label: '添加照片按钮', optional: true });
@@ -331,6 +367,9 @@ class Filler {
       cfg.imageConfirm,
       dialogs,
     );
+    if (anchor && !(await this.textsBeforeImages()).includes(anchor)) {
+      throw new Error(`第${img.n}张图片插到了错误位置（应在「${anchor.slice(0, 20)}」后面）`);
+    }
   }
 }
 
